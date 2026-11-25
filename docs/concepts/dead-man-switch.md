@@ -73,6 +73,10 @@ If the admin key itself is unavailable when the grace has lapsed, there is no re
 admin's signature. The recognition, recovery, and prevention steps are in the
 [incident playbook — account DMS-frozen, admin key unavailable](../operations/incident-playbook-admin-key-lost.md).
 
+### Emergency freeze policy & incident response
+
+During active operations where an immediate halt is required before dead-man expiry or when active compromise is suspected, operators should deploy the [Emergency Freeze Policy](../../examples/policies/emergency-freeze.json). Installing this preset or calling `pause()` immediately stops all transfers at decision-table gate 4. See the [Policy templates reference](../policy-templates.md#5-emergency-freeze--immediate-incident-lockdown) and [Incident checklist](../operations/incident-playbook-admin-key-lost.md#incident-checklist).
+
 ## Admin freeze vs. dead-man freeze
 
 These are **separate conditions**:

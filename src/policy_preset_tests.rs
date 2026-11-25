@@ -19,12 +19,13 @@ use std::string::String;
 
 const DOC: &str = "docs/policy-templates.md";
 const PRESET_DIR: &str = "examples/policies";
-const MIN_PRESETS: usize = 4;
-const PRESET_NAMES: [&str; 4] = [
+const MIN_PRESETS: usize = 5;
+const PRESET_NAMES: [&str; 5] = [
     "Day-trader agent",
     "Payments bot",
     "Watch-only + heartbeat",
     "Max security",
+    "Emergency freeze",
 ];
 
 /// Admin account contract: approves every authorization it is asked to
@@ -272,4 +273,32 @@ fn every_preset_file_installs_and_round_trips() {
              to the config the contract stores",
         );
     }
+}
+
+#[test]
+fn emergency_freeze_preset_pause_behavior_and_recovery() {
+    let PresetEnv { env, guard } = preset_env();
+    let client = PolicyEngineClient::new(&env, &guard);
+
+    let raw = fs::read_to_string(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(PRESET_DIR)
+            .join("emergency-freeze.json"),
+    )
+    .expect("read emergency-freeze.json");
+    let value: JsonValue = serde_json::from_str(&raw).expect("parse emergency-freeze.json");
+    let freeze_policy = policy_config_from_json(&env, &value, 5);
+
+    // Install the emergency freeze policy: paused is true
+    client.set_policy(&freeze_policy);
+    let installed = client.policy().expect("policy must be installed");
+    assert!(
+        installed.paused,
+        "emergency freeze policy must have paused=true"
+    );
+
+    // Verify recovery: admin can resume in place or unfreeze
+    client.resume();
+    let resumed = client.policy().expect("policy must still be installed");
+    assert!(!resumed.paused, "resumed policy must have paused=false");
 }

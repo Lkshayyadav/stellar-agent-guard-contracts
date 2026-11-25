@@ -128,6 +128,20 @@ savings account an agent can top up but never meaningfully spend from.
 - Admin compromise (policy rewrite / key rotation; funds still cannot move).
 - Non-SAC protocol calls — default-deny via the empty `protocols` list.
 
+### 5. Emergency freeze — immediate incident lockdown
+
+**File:** [`examples/policies/emergency-freeze.json`](../examples/policies/emergency-freeze.json)
+
+**Rationale.** During an active security incident, suspicious telemetry spike, or compromised agent key detection, operators require a known-good configuration to immediately halt all fund movement without inventing parameters under operational pressure. This preset sets `paused: true` with zero caps and empty allowlists. When installed via `set_policy`, it immediately binds decision-table gate 4 (`PolicyConfig.paused`), blocking every outbound transfer and protocol invocation before any per-call classification runs.
+
+**Operator sequence:**
+1. **Freeze:** Run `stellar contract invoke --id <GUARD_ID> --network testnet --source guard_admin --send=yes -- set_policy --config '<PASTE JSON>'` or invoke `pause` directly.
+2. **Verify:** Confirm with `status()` that `paused: true`.
+3. **Recovery:** Once the incident is resolved or keys rotated, restore operations via `resume` or install the regular operating policy. Full runbook procedures are detailed in [Incident playbook](../operations/incident-playbook-admin-key-lost.md) and [Dead-Man Switch](../concepts/dead-man-switch.md).
+
+**What it does NOT protect against:**
+- Compromise of the admin key itself — an attacker holding the admin key can overwrite the policy or call `resume`.
+
 ## Warnings that apply to every preset
 
 - **Unaudited.** This contract is unaudited security tooling. Independent audit before

@@ -175,6 +175,9 @@ prevention sections, and revisit the "no pending admin → terminal" statement.
 
 ## Incident checklist
 
+- [ ] Emergency halt: If active intrusion or anomalous outbound spend is observed, install
+      [`examples/policies/emergency-freeze.json`](../../examples/policies/emergency-freeze.json)
+      or call `pause()` immediately to block all transfers at decision-table gate 4.
 - [ ] Confirm the gate: `status()` reports `admin_frozen: false`, `heartbeat_expired: true`,
       `has_policy: true`; `dms_health()` reports `Expired`.
 - [ ] Check for a pending admin. There is no dedicated pending-admin read; use the
@@ -192,6 +195,10 @@ prevention sections, and revisit the "no pending admin → terminal" statement.
 
 ## See also
 
+- [Emergency Freeze Preset](../../examples/policies/emergency-freeze.json) — immediate
+  fail-safe policy configuration for incident response.
+- [Policy Templates](../policy-templates.md#5-emergency-freeze--immediate-incident-lockdown) —
+  preset overview and operator sequence.
 - [SPEC §5](../../SPEC.md#5-dead-man-switch--precise-definition) — the normative dead-man
   definition and its reversal boundary.
 - [Dead-Man Switch](../concepts/dead-man-switch.md) — the explanatory concept page.
