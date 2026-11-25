@@ -128,6 +128,20 @@ savings account an agent can top up but never meaningfully spend from.
 - Admin compromise (policy rewrite / key rotation; funds still cannot move).
 - Non-SAC protocol calls — default-deny via the empty `protocols` list.
 
+### 5. Least privilege — single asset, recipient, and protocol function
+
+**File:** [`examples/policies/least-privilege.json`](../examples/policies/least-privilege.json)
+
+**Rationale.** Operators deploying an agent with tightly-scoped responsibilities should start with a zero-trust, minimal configuration rather than open-ended allowlists. This template strictly confines the agent to:
+- **One asset:** Exactly one authorized SAC token (`CBLQLJAG...`), preventing unexpected drain of other asset balances.
+- **One recipient:** Exactly one verified recipient address (`GCDCESJS...`), ensuring funds cannot be siphoned elsewhere even if transaction payloads are altered.
+- **One protocol function:** Permits calls exclusively to the `swap` method on a specified protocol contract (`CCYIRHS5...`), eliminating surface area from administrative or liquidity functions.
+- **Strict caps & DMS:** 100 unit `per_tx_cap`, 500 unit `window_cap` per hour, and 10 protocol calls per window, backed by a 24-hour dead-man switch.
+
+**What it does NOT protect against:**
+- Loss of the admin key — modifying any rule still requires the admin signature.
+- Compromise within the allowed boundary — an attacker holding the agent key can still transfer up to 100 units per transaction (max 500/hour) to the single specified recipient.
+
 ## Warnings that apply to every preset
 
 - **Unaudited.** This contract is unaudited security tooling. Independent audit before

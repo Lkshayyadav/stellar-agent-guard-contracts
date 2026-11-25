@@ -19,12 +19,13 @@ use std::string::String;
 
 const DOC: &str = "docs/policy-templates.md";
 const PRESET_DIR: &str = "examples/policies";
-const MIN_PRESETS: usize = 4;
-const PRESET_NAMES: [&str; 4] = [
+const MIN_PRESETS: usize = 5;
+const PRESET_NAMES: [&str; 5] = [
     "Day-trader agent",
     "Payments bot",
     "Watch-only + heartbeat",
     "Max security",
+    "Least privilege",
 ];
 
 /// Admin account contract: approves every authorization it is asked to
@@ -272,4 +273,36 @@ fn every_preset_file_installs_and_round_trips() {
              to the config the contract stores",
         );
     }
+}
+
+#[test]
+fn least_privilege_preset_installs_and_enforces_single_asset_recipient_protocol() {
+    let PresetEnv { env, guard } = preset_env();
+    let client = PolicyEngineClient::new(&env, &guard);
+
+    let raw = fs::read_to_string(
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(PRESET_DIR)
+            .join("least-privilege.json"),
+    )
+    .expect("read least-privilege.json");
+    let value: JsonValue = serde_json::from_str(&raw).expect("parse least-privilege.json");
+    let policy = policy_config_from_json(&env, &value, 5);
+
+    assert_eq!(policy.assets.len(), 1, "exactly one asset permitted");
+    assert_eq!(
+        policy.recipients.len(),
+        1,
+        "exactly one recipient permitted"
+    );
+    assert_eq!(policy.protocols.len(), 1, "exactly one protocol permitted");
+    assert_eq!(
+        policy.protocols.get(0).unwrap().fns.as_ref().unwrap().len(),
+        1,
+        "exactly one function permitted"
+    );
+
+    client.set_policy(&policy);
+    let installed = client.policy().expect("installed policy must exist");
+    assert_eq!(installed, policy);
 }

@@ -291,6 +291,13 @@ without validation.
 | Payments bot | [`examples/policies/payments-bot.json`](examples/policies/payments-bot.json) |
 | Watch-only + heartbeat | [`examples/policies/watch-only-heartbeat.json`](examples/policies/watch-only-heartbeat.json) |
 | Max security | [`examples/policies/max-security.json`](examples/policies/max-security.json) |
+| Least privilege | [`examples/policies/least-privilege.json`](examples/policies/least-privilege.json) |
+
+The **Least privilege** preset serves as a minimal secure starting point by enforcing strict boundaries:
+- **Single asset allowlist:** Restricts operations to a single trusted SAC token, isolating account balances in other assets from unauthorized transfers.
+- **Single recipient:** Default-deny recipient enforcement ensures transfers can only reach one audited destination contract or treasury.
+- **Single protocol function:** Protocol allowlisting restricts smart contract invocations strictly to the authorized function (e.g. `swap`), blocking arbitrary contract calls.
+- **Conservative caps & DMS:** Tight transaction/window limits and 24-hour dead-man switch halt activity if heartbeats cease.
 
 ### `reset_window`
 ```rust
